@@ -10,7 +10,10 @@ public class Game {
 
     private final Scanner console = new Scanner(System.in);
     private Hero hero;
-    private Treasure treasure;
+    private Treasure treasure1;
+    private Treasure treasure2;
+    private boolean treasure1Obtained;
+    private boolean treasure2Obtained;
     private boolean isOver;
 
     public void run() {
@@ -25,24 +28,28 @@ public class Game {
     private void setUp() {
         System.out.print("What is the name of your hero?: ");
         String name = console.nextLine();
+        System.out.print("What symbol would you would you like your hero to have?: ");
+        char symbol = HeroHelper.getSymbol(console.nextLine());
 
         Random rand = new Random();
         int x = rand.nextInt(WIDTH);
         int y = rand.nextInt(WIDTH);
 
-        hero = new Hero(name, x, y);
-
-        // Prompt to set the hero's symbol
-        System.out.print("What symbol would you like to use for your hero?: ");
-        char symbol = console.nextLine().trim().charAt(0);
-        hero.setSymbol(symbol);
+        hero = new Hero(name, x, y, symbol);
 
         do {
             x = rand.nextInt(WIDTH);
             y = rand.nextInt(WIDTH);
         } while (x == hero.getX() && y == hero.getY());
 
-        treasure = new Treasure(x, y);
+        treasure1 = new Treasure(x, y);
+
+        do {
+            x = rand.nextInt(WIDTH);
+            y = rand.nextInt(WIDTH);
+        } while ((x == hero.getX() && y == hero.getY()) || (x == treasure1.getX() && y == treasure1.getY()));
+
+        treasure2 = new Treasure(x, y);
     }
 
     private void printWorld() {
@@ -55,7 +62,7 @@ public class Game {
             for (int col = 0; col < WIDTH; col++) {
                 if (row == hero.getY() && col == hero.getX()) {
                     System.out.print(hero.getSymbol());
-                } else if (row == treasure.getY() && col == treasure.getX()) {
+                } else if ((row == treasure1.getY() && col == treasure1.getX()) || (row == treasure2.getY() && col == treasure2.getX())) {
                     System.out.print("T");
                 } else {
                     System.out.print(EMPTY_CHARACTER);
@@ -98,8 +105,15 @@ public class Game {
                 || hero.getY() < 0 || hero.getY() >= WIDTH) {
             System.out.println(hero.getName() + " touched lava! You lose.");
             isOver = true;
-        } else if (hero.getX() == treasure.getX() && hero.getY() == treasure.getY()) {
-            System.out.println(hero.getName() + " found the treasure! You win.");
+        } else if ((hero.getX() == treasure1.getX() && hero.getY() == treasure1.getY())) {
+            System.out.println(hero.getName() + " found a treasure! It's a golden sword! O=|::::>");
+            treasure1Obtained = true;
+        } else if ((hero.getX() == treasure2.getX() && hero.getY() == treasure2.getY())) {
+            System.out.println(hero.getName() + " found a treasure! It's a golden shield! <");
+            treasure2Obtained = true;
+        }
+        if (treasure1Obtained && treasure2Obtained) {
+            System.out.println("You have found both treasures! You win!");
             isOver = true;
         }
     }
